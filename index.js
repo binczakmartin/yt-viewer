@@ -75,8 +75,8 @@ async function getPlaylistItems(playlistId) {
       }
     }).then((result) => {
       resolve(result.data.items)
-    }).catch((result) => {
-      console.log("error => ", result.data.error)
+    }).catch((error) => {
+      console.log("error => ", error.response.data)
       reject(result.data.error);
     });
   })
