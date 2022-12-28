@@ -14,8 +14,9 @@ const playlist_id = process.env.PLAYLIST_ID
 const ytApiKey = process.env.YOUTUBE_API_KEY;
 const simultaneous = process.env.SIMULTANEOUS;
 const headless = process.env.HEADLESS;
+const proxyApiKey = process.env.PROXYSCRAPE_API_KEY
 
-async function createBrowser(nb) {
+async function createBrowser(nb, proxy) {
   try {
     puppeteer.use(StealthPlugin())
 
@@ -65,14 +66,29 @@ async function createPage(browser) {
 async function getPlaylistItems(playlistId) {
   const result = await axios.get(`https://www.googleapis.com/youtube/v3/playlistItems`, {
     params: {
-      part: 'id,snippet',
-      maxResults: 10,
-      playlistId: playlistId,
-      key: ytApiKey
+      'part': 'id,snippet',
+      'maxResults': 1000,
+      'playlistId': playlistId,
+      'key': ytApiKey
     }
   });
 
   return result.data.items;
+};
+
+async function getProxies(playlistId) {
+  const result = await axios.get(`https://api.proxyscrape.com/v2/account/datacenter_shared/proxy-list`, {
+    params: {
+      'auth':'proxyApiKey',
+      'type':'getproxies',
+      'country[]':'all',
+      'protocol':'http',
+      'format':'normal',
+      'status':'all',
+    }
+  });
+
+  return result.data;
 };
 
 async function getRandomVid(playlistId) {
@@ -168,6 +184,8 @@ async function run(nb) {
 
   try {
     process.setMaxListeners(0);
+    let proxies = await getProxies();
+    console.log('proxies => ', proxies);
 
     for (let i = 0; i < nb; i++) {
       promiseArray.push(watchPlaylist(i));

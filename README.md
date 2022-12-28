@@ -1,6 +1,6 @@
 # yt-viewer 🏴‍☠️🏴‍☠️🏴‍☠️
 
-stealth bot designed to generate views on a youtube playlist
+stealth bot designed to generate traffic on a youtube playlist
 Optimized for playlists with a lot of short videos
 
 install dependencies: yarn
