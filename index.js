@@ -78,6 +78,9 @@ async function getPlaylistItems(playlistId) {
 
 async function getProxies() {
   const result = await axios.get(`https://api.proxyscrape.com/v2/account/datacenter_shared/proxy-list`, {
+    headers: { 
+      'Accept-Encoding': 'gzip,deflate,compress'
+    } ,
     params: {
       'auth': proxyApiKey,
       'type':'getproxies',
