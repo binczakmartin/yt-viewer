@@ -65,20 +65,27 @@ async function createPage(browser) {
 }
 
 async function getPlaylistItems(playlistId) {
-  const result = await axios.get(`https://www.googleapis.com/youtube/v3/playlistItems`, {
-    params: {
-      'part': 'id,snippet',
-      'maxResults': 1000,
-      'playlistId': playlistId,
-      'key': ytApiKey
+  try {
+    const result = await axios.get(`https://www.googleapis.com/youtube/v3/playlistItems`, {
+      params: {
+        'part': 'id,snippet',
+        'maxResults': 1000,
+        'playlistId': playlistId,
+        'key': ytApiKey
+      }
+    });
+    
+    console.log("error => ", result.data.error)
+    if (result.data.error) {
+      throw data.error;
     }
-  });
+    return result.data.items;
 
-  console.log("error => ", data.error)
-  if (data.error) {
-    throw data.error;
+  } catch (e) {
+    console.error(`ERROR BROWSER PAGE ${nb} : ${e}`);
+
+    throw e;
   }
-  return result.data.items;
 };
 
 async function getProxies() {
