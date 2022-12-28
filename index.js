@@ -76,8 +76,8 @@ async function getPlaylistItems(playlistId) {
     }).then((result) => {
       resolve(result.data.items)
     }).catch((error) => {
-      console.log("error => ", error.response.data)
-      reject(result.data.error);
+      console.error(`ERROR YOUTUBE API : ${error.response.data.message}`);
+      reject(error.response.data.error);
     });
   })
 };
@@ -170,13 +170,11 @@ async function watchPlaylist(nb, proxy) {
 
     console.log(`BROWSER ${nb} - CLOSE`);
     await browser.close();
-
     fs.rmSync('./datadir/' + nb, { recursive: true, force: true });
 
     return;
   } catch (e) {
     console.error(`ERROR BROWSER ${nb} : ${e}`);
-
     await browser.close();
     fs.rmSync('./datadir/' + nb, { recursive: true, force: true });
 
