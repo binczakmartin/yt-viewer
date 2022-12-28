@@ -91,7 +91,6 @@ async function getProxies() {
       'status':'all',
     }
   });
-  console.log(result);
   return result.data.split("\r\n");
 };
 
@@ -141,7 +140,6 @@ async function watchPlaylist(nb, proxy) {
   await sleep(rdn(500, 20000));
   const nbRload = 5;
   let url = await getRandomVid(playlist_id);
-  console.log("url => ", url)
   let browser = await createBrowser(nb, proxy);
   try {
     let page = await createPage(browser);
@@ -188,7 +186,6 @@ async function run(nb) {
   try {
     process.setMaxListeners(0);
     let proxies = await getProxies();
-    console.log('proxies => ', proxies);
 
     for (let i = 0; i < nb; i++) {
       promiseArray.push(watchPlaylist(i, proxies[rdn(0, proxies.length-1)]));
@@ -204,9 +201,7 @@ async function run(nb) {
 
 async function loop(simultaneous) {
   while (1) {
-    console.log('test1');
     await run(simultaneous);
-    console.log('test2');
     // limit call rate
     await sleep(rdn(20000, 50000));
   }
