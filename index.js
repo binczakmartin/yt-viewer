@@ -81,6 +81,9 @@ async function getProxies() {
     params: {
       'auth': proxyApiKey,
       'type':'getproxies',
+      'country[]':'all',
+      'protocol':'http',
+      'format':'normal',
       'status':'all',
     }
   });
