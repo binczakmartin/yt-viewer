@@ -155,7 +155,7 @@ async function watchPlaylist(nb, proxy) {
       console.log(`BROWSER ${nb} - RELOAD`);
       await sleep(rdn(60000, 60000*5));
       await page.goto(url);
-      await clickRandom(page, nb);
+      await clickRandomVideo(page, nb);
     }
 
     console.log(`BROWSER ${nb} - CLOSE`);
