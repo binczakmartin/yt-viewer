@@ -83,7 +83,7 @@ async function clickConsent(page, nb) {
   return new Promise((resolve, reject) => {
     const cookieConsentXpath = '//*[@id="yDmH0d"]/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/form[2]/div/div/button';
 
-    page.waitForXPath(cookieConsentXpath, {timeout: 10000}).then(async (elem) => {
+    page.waitForXPath(cookieConsentXpath, {timeout: 30000}).then(async (elem) => {
       const cookieConsentCoordinate = await elem.boundingBox()
       await sleep(rdn(2000, 4000));
       await page.mouse.click(cookieConsentCoordinate.x + 10, cookieConsentCoordinate.y + 10, { button: 'left' });
@@ -100,14 +100,14 @@ async function clickRandomPlaylist(page, nb) {
   return new Promise((resolve, reject) => {
     const randomXpath = '//*[@id="page-manager"]/ytd-browse/ytd-playlist-header-renderer/div/div[2]/div[1]/div/div[2]/ytd-button-renderer[2]/yt-button-shape/a/yt-touch-feedback-shape/div/div[2]';
 
-    page.waitForXPath(randomXpath, {timeout: 10000}).then(async (elem) => {
+    page.waitForXPath(randomXpath, {timeout: 30000}).then(async (elem) => {
       const randomCoordinate = await elem.boundingBox()
       await sleep(rdn(10000, 20000));
       console.log(`BROWSER ${nb} - CLICK RANDOM BUTTON`);
       await page.mouse.click(randomCoordinate.x + 10, randomCoordinate.y + 10, { button: 'left' });
       resolve();
     }).catch((e) => {
-      console.log(`BROWSER ${nb} - RANDOM BUTTON NOT FOUND`);
+      console.log(`BROWSER ${nb} - RANDOM PLAYLIST BUTTON NOT FOUND`);
       resolve();
     });
   })
@@ -117,14 +117,14 @@ async function clickRandomVideo(page, nb) {
   return new Promise((resolve, reject) => {
     const randomXpath = '//*[@id="top-level-buttons-computed"]/ytd-toggle-button-renderer';
 
-    page.waitForXPath(randomXpath, {timeout: 10000}).then(async (elem) => {
+    page.waitForXPath(randomXpath, {timeout: 30000}).then(async (elem) => {
       const randomCoordinate = await elem.boundingBox()
       await sleep(rdn(10000, 20000));
       console.log(`BROWSER ${nb} - CLICK RANDOM BUTTON`);
       await page.mouse.click(randomCoordinate.x + 10, randomCoordinate.y + 10, { button: 'left' });
       resolve();
     }).catch((e) => {
-      console.log(`BROWSER ${nb} - RANDOM BUTTON NOT FOUND`);
+      console.log(`BROWSER ${nb} - RANDOM VIDEO BUTTON NOT FOUND`);
       resolve();
     });
   })
