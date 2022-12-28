@@ -82,7 +82,7 @@ async function getPlaylistItems(playlistId) {
     return result.data.items;
 
   } catch (e) {
-    console.error(`ERROR BROWSER PAGE ${nb} : ${e}`);
+    console.error(`ERROR YOUTUBE API : ${e}`);
 
     throw e;
   }
