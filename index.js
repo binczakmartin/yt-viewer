@@ -35,6 +35,7 @@ async function createBrowser(nb, proxy) {
       ignoreHTTPSErrors: true,
       executablePath: executablePath(),
     });
+    console.log(`BROWSER ${nb} - START USING PROXY ${proxy}`);
 
     return browser;
   } catch (e) {
@@ -144,7 +145,6 @@ async function watchPlaylist(nb, proxy) {
   let browser = await createBrowser(nb, proxy);
   try {
     let page = await createPage(browser);
-    console.log(`BROWSER ${nb} - START`);
 
     page.on("framenavigated", frame => {
       const v = getParameterByName('v', frame.url())
