@@ -140,9 +140,10 @@ async function watchPlaylist(nb, proxy) {
 
     page.on("framenavigated", frame => {
       const v = getParameterByName('v', frame.url())
-      if (v) {
-        console.log(`BROWSER ${nb} - WATCHING ${v}`);
-      }
+      console.log(`BROWSER ${nb} - URL ${frame.url()}`);
+      // if (v) {
+      //   console.log(`BROWSER ${nb} - WATCHING ${v}`);
+      // }
     });
 
     await page.goto(url);
