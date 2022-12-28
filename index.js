@@ -143,7 +143,7 @@ async function clickRandom(page, nb) {
 
 async function watchPlaylist(nb, proxy) {
   await sleep(rdn(500, 20000));
-  const nbRload = 5;
+  const nbRload = 12;
   let url = await getRandomVid(playlist_id);
   let browser = await createBrowser(nb, proxy);
   try {
@@ -163,8 +163,7 @@ async function watchPlaylist(nb, proxy) {
 
     for (let i = 0; i < nbRload; i++) {
       console.log(`BROWSER ${nb} - RELOAD`);
-      await sleep(rdn(20000, 60000));
-      url = await getRandomVid(playlist_id);
+      await sleep(rdn(60000, 60000*5));
       await page.goto(url);
       await clickRandom(page, nb);
     }
