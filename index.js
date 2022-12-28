@@ -76,18 +76,15 @@ async function getPlaylistItems(playlistId) {
   return result.data.items;
 };
 
-async function getProxies(playlistId) {
+async function getProxies() {
   const result = await axios.get(`https://api.proxyscrape.com/v2/account/datacenter_shared/proxy-list`, {
     params: {
       'auth': proxyApiKey,
       'type':'getproxies',
-      'country[]':'all',
-      'protocol':'http',
-      'format':'normal',
       'status':'all',
     }
   });
-
+  console.log(result);
   return result.data;
 };
 
