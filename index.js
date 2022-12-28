@@ -74,6 +74,10 @@ async function getPlaylistItems(playlistId) {
     }
   });
 
+  console.log("error => ", data.error)
+  if (data.error) {
+    throw data.error;
+  }
   return result.data.items;
 };
 
