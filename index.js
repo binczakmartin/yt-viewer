@@ -91,7 +91,7 @@ async function getProxies() {
     }
   });
   console.log(result);
-  return result.data.split("\n");
+  return result.data.split("\r\n");
 };
 
 async function getRandomVid(playlistId) {
