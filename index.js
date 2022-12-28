@@ -76,8 +76,8 @@ async function getPlaylistItems(playlistId) {
     }).then((result) => {
       resolve(result.data.items)
     }).catch((error) => {
-      console.error(`ERROR YOUTUBE API : ${error.response.data.errors.message}`);
-      reject(error.response.data.errors);
+      console.error(`ERROR YOUTUBE API : ${error.response.data.error}`);
+      reject(error.response.data.error);
     });
   })
 };
