@@ -24,7 +24,7 @@ async function createBrowser(nb, proxy) {
       defaultViewport: null,
       headless: headless,
       args: [
-        // '--proxy-server='+proxy,
+        '--proxy-server='+proxy,
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-web-security',
@@ -91,7 +91,7 @@ async function getProxies() {
     }
   });
   console.log(result);
-  return result.data;
+  return result.data.split("\n");
 };
 
 async function getRandomVid(playlistId) {
@@ -136,12 +136,12 @@ async function clickRandom(page, nb) {
   })
 }
 
-async function watchPlaylist(nb) {
+async function watchPlaylist(nb, proxy) {
   await sleep(rdn(500, 20000));
   const nbRload = 5;
   let url = await getRandomVid(playlist_id);
   console.log("url => ", url)
-  let browser = await createBrowser(nb);
+  let browser = await createBrowser(nb, proxy);
   try {
     let page = await createPage(browser);
     console.log(`BROWSER ${nb} - START`);
@@ -191,7 +191,7 @@ async function run(nb) {
     console.log('proxies => ', proxies);
 
     for (let i = 0; i < nb; i++) {
-      promiseArray.push(watchPlaylist(i));
+      promiseArray.push(watchPlaylist(i, proxies[rdn(0, proxies.length-1)]));
     }
     await Promise.all(promiseArray);
 
