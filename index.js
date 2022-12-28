@@ -11,9 +11,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const playlist_id = process.env.PLAYLIST_ID
-const ytApiKey = process.env.YOUTUBE_API_KEY;
 const simultaneous = process.env.SIMULTANEOUS;
-const headless = process.env.HEADLESS;
 const proxyApiKey = process.env.PROXYSCRAPE_API_KEY
 
 async function createBrowser(nb, proxy) {
@@ -22,7 +20,7 @@ async function createBrowser(nb, proxy) {
 
     const browser = await puppeteer.launch({
       defaultViewport: null,
-      headless: headless,
+      headless: false,
       args: [
         '--proxy-server='+proxy,
         '--no-sandbox',
@@ -64,24 +62,6 @@ async function createPage(browser) {
   }
 }
 
-async function getPlaylistItems(playlistId) {
-  return new Promise((resolve, reject) => {
-    axios.get(`https://www.googleapis.com/youtube/v3/playlistItems`, {
-      params: {
-        'part': 'id,snippet',
-        'maxResults': 1000,
-        'playlistId': playlistId,
-        'key': ytApiKey
-      }
-    }).then((result) => {
-      resolve(result.data.items)
-    }).catch((error) => {
-      console.error(`ERROR YOUTUBE API : ${error.response.data.error.message}`);
-      reject(error.response.data.error.message);
-    });
-  })
-};
-
 async function getProxies() {
   const result = await axios.get(`https://api.proxyscrape.com/v2/account/datacenter_shared/proxy-list`, {
     headers: { 
@@ -99,21 +79,13 @@ async function getProxies() {
   return result.data.split("\r\n");
 };
 
-async function getRandomVid(playlistId) {
-  const vids = await getPlaylistItems(playlistId)
-
-  const videoId = vids[rdn(0, vids.length)].snippet.resourceId.videoId;
-
-  return `https://www.youtube.com/watch?v=${videoId}&list=${playlistId}`;
-}
-
 async function clickConsent(page, nb) {
   return new Promise((resolve, reject) => {
-    const cookieConsentXpath = '//*[@id="content"]/div[2]/div[6]/div[1]/ytd-button-renderer[2]/yt-button-shape';
+    const cookieConsentXpath = '//*[@id="yDmH0d"]/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/form[2]/div/div/button';
 
-    page.waitForXPath(cookieConsentXpath).then(async (elem) => {
+    page.waitForXPath(cookieConsentXpath, {timeout: 10000}).then(async (elem) => {
       const cookieConsentCoordinate = await elem.boundingBox()
-      await sleep(rdn(10000, 20000));
+      await sleep(rdn(2000, 4000));
       await page.mouse.click(cookieConsentCoordinate.x + 10, cookieConsentCoordinate.y + 10, { button: 'left' });
       console.log(`BROWSER ${nb} - CLICK CONSENT`);
       resolve();
@@ -124,11 +96,28 @@ async function clickConsent(page, nb) {
   })
 }
 
-async function clickRandom(page, nb) {
+async function clickRandomPlaylist(page, nb) {
+  return new Promise((resolve, reject) => {
+    const randomXpath = '//*[@id="page-manager"]/ytd-browse/ytd-playlist-header-renderer/div/div[2]/div[1]/div/div[2]/ytd-button-renderer[2]/yt-button-shape/a/yt-touch-feedback-shape/div/div[2]';
+
+    page.waitForXPath(randomXpath, {timeout: 10000}).then(async (elem) => {
+      const randomCoordinate = await elem.boundingBox()
+      await sleep(rdn(10000, 20000));
+      console.log(`BROWSER ${nb} - CLICK RANDOM BUTTON`);
+      await page.mouse.click(randomCoordinate.x + 10, randomCoordinate.y + 10, { button: 'left' });
+      resolve();
+    }).catch((e) => {
+      console.log(`BROWSER ${nb} - RANDOM BUTTON NOT FOUND`);
+      resolve();
+    });
+  })
+}
+
+async function clickRandomVideo(page, nb) {
   return new Promise((resolve, reject) => {
     const randomXpath = '//*[@id="top-level-buttons-computed"]/ytd-toggle-button-renderer';
 
-    page.waitForXPath(randomXpath).then(async (elem) => {
+    page.waitForXPath(randomXpath, {timeout: 10000}).then(async (elem) => {
       const randomCoordinate = await elem.boundingBox()
       await sleep(rdn(10000, 20000));
       console.log(`BROWSER ${nb} - CLICK RANDOM BUTTON`);
@@ -144,7 +133,7 @@ async function clickRandom(page, nb) {
 async function watchPlaylist(nb, proxy) {
   await sleep(rdn(500, 20000));
   const nbRload = 12;
-  let url = await getRandomVid(playlist_id);
+  let url = `https://www.youtube.com/playlist?list=${playlist_id}`;
   let browser = await createBrowser(nb, proxy);
   try {
     let page = await createPage(browser);
@@ -158,8 +147,9 @@ async function watchPlaylist(nb, proxy) {
 
     await page.goto(url);
 
-    clickConsent(page, nb);
-    await clickRandom(page, nb);
+    await clickConsent(page, nb);
+    await clickRandomPlaylist(page, nb);
+    await clickRandomVideo(page, nb);
 
     for (let i = 0; i < nbRload; i++) {
       console.log(`BROWSER ${nb} - RELOAD`);
@@ -205,7 +195,7 @@ async function loop(simultaneous) {
   while (1) {
     await run(simultaneous);
     // limit call rate
-    await sleep(rdn(20000, 50000));
+    await sleep(rdn(10000, 30000));
   }
 }
 
