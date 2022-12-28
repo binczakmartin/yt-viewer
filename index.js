@@ -20,7 +20,7 @@ async function createBrowser(nb, proxy) {
 
     const browser = await puppeteer.launch({
       defaultViewport: null,
-      headless: false,
+      headless: true,
       args: [
         '--proxy-server='+proxy,
         '--no-sandbox',
