@@ -19,8 +19,7 @@ async function createBrowser(nb, proxy) {
   try {
     puppeteer.use(StealthPlugin())
 
-    const userAgent = new UserAgent().userAgent;
-    console.log(userAgent);
+    const randomAgent = new UserAgent();
 
     const browser = await puppeteer.launch({
       defaultViewport: null,
@@ -31,9 +30,9 @@ async function createBrowser(nb, proxy) {
         '--disable-setuid-sandbox',
         '--disable-web-security',
         '--user-data-dir=datadir/' + nb,
-        '--window-size=1500,2000',
+        '--window-size='+randomAgent.viewportHeight+','+randomAgent.viewportWidth,
         '--disable-features=site-per-process',
-        '--user-agent=' + userAgent,
+        '--user-agent=' + randomAgent.userAgent,
       ],
       ignoreHTTPSErrors: true,
       executablePath: executablePath(),
