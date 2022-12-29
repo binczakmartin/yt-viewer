@@ -32,7 +32,7 @@ async function createBrowser(nb, proxy) {
     ]
 
     if (process.env.USE_PROXY == 1) {
-      args.push('--proxy-server=' + proxy);
+      args.push('--proxy-server='+ 'socks5://' + proxy);
     }
 
     const browser = await puppeteer.launch({
@@ -72,19 +72,38 @@ async function createPage(browser) {
 }
 
 async function getProxies() {
-  const result = await axios.get(`https://api.proxyscrape.com/v2/account/datacenter_shared/proxy-list`, {
-    headers: {
-      'Accept-Encoding': 'gzip,deflate,compress'
-    },
-    params: {
-      'auth': proxyApiKey,
-      'type': 'getproxies',
-      'country[]': 'all',
-      'protocol': 'http',
-      'format': 'normal',
-      'status': 'all',
-    }
-  });
+  let result = null;
+
+  if (process.env.PROXYSCRAPE_API_KEY == 0) {
+    result = await axios.get(`https://api.proxyscrape.com/v2`, {
+      headers: {
+        'Accept-Encoding': 'gzip,deflate,compress'
+      },
+      params: {
+        'request': 'displayproxies',
+        'country': 'all',
+        'protocol': 'socks5',
+        'timeaout': 20000,
+        'ssl': 'all',
+        'anonymity': 'all'
+      }
+    })
+  } else {
+    result = await axios.get(`https://api.proxyscrape.com/v2/account/datacenter_shared/proxy-list`, {
+      headers: {
+        'Accept-Encoding': 'gzip,deflate,compress'
+      },
+      params: {
+        'auth': proxyApiKey,
+        'type': 'getproxies',
+        'country[]': 'all',
+        'protocol': 'socks5',
+        'format': 'normal',
+        'status': 'all',
+      }
+    });
+  }
+
   return result.data.split("\r\n");
 };
 
