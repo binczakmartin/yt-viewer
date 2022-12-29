@@ -32,7 +32,7 @@ async function createBrowser(nb, proxy) {
     ]
 
     if (process.env.USE_PROXY == 1) {
-      args.push('--proxy-server='+ 'socks5://' + proxy);
+      args.push('--proxy-server='+ proxy);
     }
 
     const browser = await puppeteer.launch({
@@ -82,8 +82,8 @@ async function getProxies() {
       params: {
         'request': 'displayproxies',
         'country': 'all',
-        'protocol': 'socks5',
-        'timeaout': 20000,
+        'protocol': 'http',
+        'timeout': 20000,
         'ssl': 'all',
         'anonymity': 'all'
       }
@@ -97,7 +97,7 @@ async function getProxies() {
         'auth': proxyApiKey,
         'type': 'getproxies',
         'country[]': 'all',
-        'protocol': 'socks5',
+        'protocol': 'http',
         'format': 'normal',
         'status': 'all',
       }
