@@ -232,7 +232,7 @@ async function clickOnVideo(page, label, nb) {
   })
 }
 
-async function getVideoName(page) {
+async function getVideoName(page, nb) {
   try {
     const labelXpath = '//*[@id="title"]/h1/yt-formatted-string';
     const labelElem = await page.waitForXPath(labelXpath, { timeout: 5000 });
@@ -240,7 +240,7 @@ async function getVideoName(page) {
 
     return label;
   } catch(e) {
-    console.log(`BROWSER ${nb} - BUTTON NOT FOUND`);
+    console.log(`BROWSER ${nb} - BUTTON VIDEO NAME NOT FOUND`);
   }
 }
 
@@ -276,7 +276,7 @@ async function watchPlaylist(nb, proxy) {
     page.on("framenavigated", async (frame) => {
       const v = getParameterByName('v', frame.url())
       if (v) {
-        let videoName = await getVideoName(page);
+        let videoName = await getVideoName(page, nb);
         console.log(`BROWSER ${nb} - WATCHING ${videoName ? videoName : 'AD'}`);
         await sleep(rdn(500, 1200));
         await clickRandomVideo(page, nb);
