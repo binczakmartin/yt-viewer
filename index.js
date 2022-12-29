@@ -19,7 +19,7 @@ async function createBrowser(nb, proxy) {
   try {
     puppeteer.use(StealthPlugin())
 
-    const userAgent = new UserAgent();
+    const userAgent = new UserAgent().userAgent;
     console.log(userAgent);
 
     const browser = await puppeteer.launch({
