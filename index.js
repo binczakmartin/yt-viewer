@@ -7,6 +7,7 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import fs from 'fs';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import UserAgent from 'user-agents'
 
 dotenv.config();
 
@@ -17,6 +18,9 @@ const proxyApiKey = process.env.PROXYSCRAPE_API_KEY
 async function createBrowser(nb, proxy) {
   try {
     puppeteer.use(StealthPlugin())
+
+    const userAgent = new UserAgent();
+    console.log(userAgent);
 
     const browser = await puppeteer.launch({
       defaultViewport: null,
@@ -29,6 +33,7 @@ async function createBrowser(nb, proxy) {
         '--user-data-dir=datadir/' + nb,
         '--window-size=1500,2000',
         '--disable-features=site-per-process',
+        '--user-agent=' + userAgent,
       ],
       ignoreHTTPSErrors: true,
       executablePath: executablePath(),
