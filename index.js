@@ -19,14 +19,15 @@ async function createBrowser(nb, proxy) {
   try {
     puppeteer.use(StealthPlugin())
 
-    const randomAgent = new UserAgent();
+    const randomAgent = new UserAgent({ deviceCategory: 'desktop' });
 
     let args = [
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-web-security',
       '--user-data-dir=datadir/' + nb,
-      '--window-size=' + randomAgent.viewportHeight + ',' + randomAgent.viewportWidth,
+      // '--window-size=' + randomAgent.viewportHeight + ',' + randomAgent.viewportWidth,
+      '--window-size=1900,1000',
       '--disable-features=site-per-process',
       '--user-agent=' + randomAgent.userAgent,
     ]
@@ -110,6 +111,23 @@ async function getProxies() {
 async function clickConsent(page, nb) {
   return new Promise((resolve, reject) => {
     const cookieConsentXpath = '//*[@id="yDmH0d"]/c-wiz/div/div/div/div[2]/div[1]/div[3]/div[1]/form[2]/div/div/button';
+
+    page.waitForXPath(cookieConsentXpath, { timeout: 2000 }).then(async (elem) => {
+      const cookieConsentCoordinate = await elem.boundingBox()
+      await sleep(rdn(2000, 4000));
+      await page.mouse.click(cookieConsentCoordinate.x + 10, cookieConsentCoordinate.y + 10, { button: 'left' });
+      console.log(`BROWSER ${nb} - CLICK CONSENT`);
+      resolve();
+    }).catch((e) => {
+      console.log(`BROWSER ${nb} - CONSENT COOKIE NOT FOUND`);
+      resolve();
+    });
+  })
+}
+
+async function clickConsent2(page, nb) {
+  return new Promise((resolve, reject) => {
+    const cookieConsentXpath = '//*[@id="content"]/div[2]/div[6]/div[1]/ytd-button-renderer[2]/yt-button-shape/button/yt-touch-feedback-shape/div/div[2]';
 
     page.waitForXPath(cookieConsentXpath, { timeout: 2000 }).then(async (elem) => {
       const cookieConsentCoordinate = await elem.boundingBox()
@@ -286,9 +304,82 @@ async function watchPlaylist(nb, proxy) {
 
     await page.goto(url);
 
-    await clickConsent(page, nb);
+    await clickConsent2(page, nb);
     await clickRandomPlaylistDektop(page, nb);
     await reloadPlaylist(page, nb);
+
+    console.log(`BROWSER ${nb} - CLOSE`);
+    await browser.close();
+    fs.rmSync('./datadir/' + nb, { recursive: true, force: true });
+
+    return;
+  } catch (e) {
+    console.error(`ERROR BROWSER ${nb} : ${e}`);
+    await browser.close();
+    fs.rmSync('./datadir/' + nb, { recursive: true, force: true });
+
+    return;
+  }
+}
+
+async function clickSearch(page, text, nb) {
+  return new Promise(async (resolve, reject) => {
+    const buttonXpath = '//*[@id="search-icon-legacy"]';
+    const searchXpath = '//*[@id="search-input"]';
+
+    page.waitForXPath(searchXpath, { timeout: 30000 }).then(async (elem) => {
+      console.log(elem);
+      await sleep(rdn(2000, 5000));
+      await elem.click();
+      await elem.type(text, {delay: 150});
+      page.waitForXPath(buttonXpath, { timeout: 30000 }).then(async (elem) => {
+        const randomCoordinate = await elem.boundingBox()
+        console.log(`BROWSER ${nb} - SEARCH ${text}`);
+        await page.mouse.click(randomCoordinate.x + 30, randomCoordinate.y + 30, { button: 'left' });
+        resolve();
+      }).catch((e) => {
+        console.log(`BUTTON ${nb} - ERROR ${e}`);
+        resolve();
+      });
+    }).catch((e) => {
+      console.log(`SEARCH ${nb} - ERROR ${e}`);
+    })
+  })
+}
+
+async function clickOnVideoThumb(page, nb) {
+  return new Promise((resolve, reject) => {
+    const thumbXpath = '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div[2]/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-video-renderer[1]/div[1]/ytd-thumbnail';
+
+    page.waitForXPath(thumbXpath, { timeout: 30000 }).then(async (elem) => {
+      const randomCoordinate = await elem.boundingBox()
+      console.log(`BROWSER ${nb} - CLICK THUMB`);
+      await page.mouse.click(randomCoordinate.x + 50, randomCoordinate.y + 50, { button: 'left' });
+      resolve();
+    }).catch((e) => {
+      console.log(`BROWSER ${nb} - THUMB NOT FOUND ${e}`);
+      resolve();
+    });
+  })
+}
+
+async function watchVideo(nb, proxy) {
+  await sleep(rdn(500, 20000));
+  const url = `https://www.youtube.com/`;
+  let browser = await createBrowser(nb, proxy);
+  try {
+    let page = await createPage(browser);
+    let content = fs.readFileSync('codes.txt',{encoding:'utf8', flag:'r'});
+    let tab = content.split('\n');
+    
+    await page.goto(url);
+    await sleep(rdn(1000, 2200));
+    await clickConsent2(page, nb);
+    await sleep(rdn(1000, 2200));
+    await clickSearch(page, tab[rdn(0, tab.length)], nb);
+    await sleep(rdn(1000, 2200));
+    await clickOnVideoThumb(page, nb);
+    await sleep(rdn(100000, 190000));
 
     console.log(`BROWSER ${nb} - CLOSE`);
     await browser.close();
@@ -312,11 +403,19 @@ async function run(nb) {
     if (process.env.USE_PROXY == 1) {
       let proxies = await getProxies();
       for (let i = 0; i < nb; i++) {
-        promiseArray.push(watchPlaylist(i, proxies[rdn(0, proxies.length - 1)]));
+        if (process.env.MODE == 'SEARCH') {
+          promiseArray.push(watchPlaylist(i, proxies[rdn(0, proxies.length - 1)]));
+        } else {
+          promiseArray.push(watchPlaylist(i, proxies[rdn(0, proxies.length - 1)]));
+        }
       }
     } else {
       for (let i = 0; i < nb; i++) {
-        promiseArray.push(watchPlaylist(i));
+        if (process.env.mode == 'SEARCH') {
+          promiseArray.push(watchVideo(i));
+        } else {
+          promiseArray.push(watchVideo(i));
+        }
       }
     }
 
