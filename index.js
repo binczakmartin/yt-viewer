@@ -404,17 +404,17 @@ async function run(nb) {
       let proxies = await getProxies();
       for (let i = 0; i < nb; i++) {
         if (process.env.MODE == 'SEARCH') {
-          promiseArray.push(watchPlaylist(i, proxies[rdn(0, proxies.length - 1)]));
+          promiseArray.push(watchVideo(i, proxies[rdn(0, proxies.length - 1)]));
         } else {
           promiseArray.push(watchPlaylist(i, proxies[rdn(0, proxies.length - 1)]));
         }
       }
     } else {
       for (let i = 0; i < nb; i++) {
-        if (process.env.mode == 'SEARCH') {
+        if (process.env.MODE == 'SEARCH') {
           promiseArray.push(watchVideo(i));
         } else {
-          promiseArray.push(watchVideo(i));
+          promiseArray.push(watchPlaylist(i));
         }
       }
     }
